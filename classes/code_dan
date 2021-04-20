@@ -1,0 +1,160 @@
+import numpy as np
+#import pandas as pd
+
+class Pyfour:
+    
+
+    """
+    DOCSTRING: Connect 4 game in Python using human vs human & human vs AI
+    """
+    pyfour_board_counter = 0
+    numberOfPlayer = 0
+
+    def __init__(self):
+        """
+        DOCSTRING: Increment a counter each init and sets default grid values
+        """
+        Pyfour.pyfour_board_counter += 1
+        self.board_nb = Pyfour.pyfour_board_counter
+        self.default_nboflines = 6
+        self.default_nbofcolumns = 7
+        self.default_nbconnect= 4
+        self.board = np.zeros((self.default_nboflines, self.default_nbofcolumns), dtype=int)
+        # self.board = [[0,0,0,0,0,0,0]
+        #               [0,0,0,0,0,0,0]
+        #               [0,0,0,0,0,0,0]
+        #               [0,0,0,0,0,0,0]
+        #               [0,0,0,0,0,0,0]
+        #               [0,0,0,0,0,0,0]]
+        
+    def setter_nlines(self, n_line):
+        self.default_nboflines = n_line
+
+    def setter_ncol(self, n_col):
+        self.default_nbofcolumns = n_col
+    
+    def setter_nconnect(self, n_connect):
+        self.default_nbconnect = n_connect
+    
+
+    def nbPlayer(self):
+        """
+        DOCSTRING: number of player(s)
+        """
+        while self.numberOfPlayer <= 0 or self.numberOfPlayer > 2:
+          self.numberOfPlayer = int(input("Select number of player(s) 1 or 2 :"))
+        return print("\n", f"The game will begin with {self.numberOfPlayer} player(s)", "\n")
+
+    def displayBoard(self):
+        """
+        DOCSTRING: Display the board
+        """
+        board = self.board
+        return print(board, "\n")
+
+    def displayBoardNumber(self):
+        """
+        DOCSTRING: Display the board number
+        """
+        print(f"Board #{self.board_nb}", "\n")
+
+        # def isAvailable(self, line, column):
+        #   if line[column] == 0:
+        #     return True
+        #   return False
+
+    def isColFull(self, column:int):
+        if 0 not in self.board[:,column]:
+            return True
+        else:
+            return False
+
+    def colChoice(self, player:int, choice:int):
+        """
+        DOCSTRING: Inserting a coin into a col
+        """
+
+        if self.isBoardFull():
+            return -2
+        elif self.isColFull(choice):
+            print(f'Column {choice} full')
+            return -1
+        else:
+            column = self.board[:,choice]
+            for i in range(0, self.default_nboflines)[::-1]:
+                if column[i] == 0:
+                  column[i] = player
+                  break
+            return i
+
+
+    def isBoardFull(self):
+        """
+        DOCSTRING: 
+        """
+        return 0 not in self.board[0]
+
+    def player_input(self, player, choice): #player = coin value (-1, 1) 
+        """ 
+        DOCSTRING: 
+        """
+        self.joue(player, choice)
+
+        # Random move for player2
+        choice2 = np.random.randint(0, 7) # random player choice
+
+        #player2 = -player
+
+        self.joue(-player, choice2)
+
+
+        return self.board, 0, self.isBoardFull()
+
+
+    def joue(self,player, choice):    
+        line = self.colChoice(player, choice) # Shall we play ?
+        if line < 0:
+            return line
+
+        # Connect4 test on col
+        column = self.board[:,choice]
+        if np.all(column[line:line+self.default_nbconnect] == player) and len(column[line:line+self.default_nbconnect]) == self.default_nbconnect:
+            print(f"{player} The best in col!")
+            return self.board, 1, True
+
+        # Connect4 test on line
+        window = [player] * self.default_nbconnect
+        test = np.convolve(self.board[line, max(0, choice-self.default_nbconnect + 1):choice+self.default_nbconnect], window)
+        if abs(player)*self.default_nbconnect in test:
+            print(f"{player} The best in line!")
+            return self.board, 1, True #2
+
+        # Connect4 test on diag
+        board_padded = np.pad(self.board, (self.default_nbconnect-1, self.default_nbconnect-1))
+        m8 = board_padded[line:line+2*self.default_nbconnect-1, choice:choice+2*self.default_nbconnect-1]
+        #print(f"line= {line} diag: m8:\n{m8}")
+
+        d1 = np.diag(m8)
+        d2 = np.diag(m8[::-1])
+        test = np.convolve(d1, window)
+        #print(f"Diag1: \n {d1}")
+        #print(f"windows= {window}")
+        #print(f"Test:\n{test}")
+
+        #
+        test = np.convolve(d1, window)
+        if abs(player)*self.default_nbconnect in test:
+            print(f"{player} The best in diag!")
+            return self.board, 1, True
+
+        #
+        test = np.convolve(d2, window)
+        if abs(player)*self.default_nbconnect in test:
+            print(f"{player} The best in diag inversé !")
+            return self.board, 1, True
+
+
+
+
+
+    

@@ -1,0 +1,13 @@
+    def  create_model_qui_fonctionne(self):
+        model = Sequential()
+        state_shape  = self.env.shape
+
+        model.add(Dense(24, input_shape= state_shape, activation="relu")) # VOIR EVENTUELLEMENT SANS [0]
+        model.add(Dense(state_shape[0] * state_shape[1], input_shape= state_shape, activation="relu"))
+
+        model.add(Dense(7))
+
+        model.compile(loss="mean_squared_error", optimizer=Adam(lr=self.learning_rate))
+
+        return model
+
